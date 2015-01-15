@@ -6,13 +6,38 @@
 define(function (require, exports, module) {
   "use strict";
 
-  var CommandManager = brackets.getModule("command/CommandManager"),
+  var AppInit        = brackets.getModule("utils/AppInit"),
+      CommandManager = brackets.getModule("command/CommandManager"),
       EditorManager  = brackets.getModule("editor/EditorManager"),
-      KeyEvent       = brackets.getModule("utils/KeyEvent");
+      KeyEvent       = brackets.getModule("utils/KeyEvent"),
       Menus          = brackets.getModule("command/Menus");
 
+  function _keyEventHandler($event, editor, event) {
+    var editor = EditorManager.getFocusedEditor();
+    if (editor) {
+      var text = editor.document.getText();
+      console.log(text);
+    }
+  }
 
-  // Function to run when the menu item is clicked
+  function _activeEditorChangeHandler($event, focusedEditor, lostEditor) {
+    if (lostEditor) {
+      $(lostEditor).off('keydown', _keyEventHandler);
+    }
+    if (focusedEditor) {
+      $(focusedEditor).on('keydown', _keyEventHandler);
+    }
+  }
+  
+  AppInit.appReady(function() {
+    console.log('MYAPP IS READY');
+    var currentEditor = EditorManager.getActiveEditor();
+    $(currentEditor).on('keydown', _keyEventHandler);
+    $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
+  });
+  
+  // $(EditorManager.getCurrentFullEditor()).on('keyEvent', _handleKeyEvent);
+
   function handleHelloWorld() {
     var editor = EditorManager.getFocusedEditor();
     if (editor) {
@@ -27,14 +52,6 @@ define(function (require, exports, module) {
     }
   }
 
-  function _handleKeyEvent() {
-    console.log('hoge');
-  }
-
-  $(EditorManager.getFocusedEditor()).on('keyEvent', _handleKeyEvent);
-
-  
-  // First, register a command - a UI-less object associating an id to a handler
   var MY_COMMAND_ID = "helloworld.writehello";   // package-style naming to avoid collisions
   CommandManager.register("Hello World 2", MY_COMMAND_ID, handleHelloWorld);
 
