@@ -6,13 +6,35 @@
 define(function (require, exports, module) {
   "use strict";
 
-  var AppInit        = brackets.getModule("utils/AppInit"),
-      CommandManager = brackets.getModule("command/CommandManager"),
-      EditorManager  = brackets.getModule("editor/EditorManager"),
-      KeyEvent       = brackets.getModule("utils/KeyEvent"),
-      Menus          = brackets.getModule("command/Menus");
+  var AppInit         = brackets.getModule("utils/AppInit"),
+      CommandManager  = brackets.getModule("command/CommandManager"),
+      DocumentManager = brackets.getModule("document/DocumentManager"),
+      EditorManager   = brackets.getModule("editor/EditorManager"),
+      FileSystem      = brackets.getModule("file/FileSystem"),
+      FileUtils       = brackets.getModule("file/FileUtils"),
+      KeyEvent        = brackets.getModule("utils/KeyEvent"),
+      Menus           = brackets.getModule("command/Menus"),
+      QuickOpen       = brackets.getModule("search/QuickOpen");
+ 
+  
 
+  var InlineDocsViewer = require("InlineDocsViewer");
   var io = require("./lib/socket.io");
+
+  function inlineProvider(hostEditor, pos) {
+    var result = new $.Deferred();
+    
+    var currentDoc = DocumentManager.getCurrentDocument().getText();
+    var docDir = FileUtils.getDirectoryPath(hostEditor.document.file.fullPath);
+    var langId = hostEditor.getLanguageForSelection().getId();
+
+    var inlineWidget = new InlineDocsViewer('hoge', 'hoge descript');
+    inlineWidget.load(hostEditor);
+    result.resolve(inlineWidget);
+    
+    return result.promise();
+
+  }
   
   function _keyEventHandler($event, editor, event) {
     var editor = EditorManager.getFocusedEditor();
@@ -32,6 +54,9 @@ define(function (require, exports, module) {
       $(focusedEditor).on('keydown', _keyEventHandler);
     }
   }
+
+  EidtorManager.registerInlineDocsProvider(inlineProvider);
+  exports._inlineProvider = InlineProvider;
   
   AppInit.appReady(function() {
     console.log('MYAPP IS READY');
