@@ -12,11 +12,15 @@ define(function (require, exports, module) {
       KeyEvent       = brackets.getModule("utils/KeyEvent"),
       Menus          = brackets.getModule("command/Menus");
 
+  var io = require("./lib/socket.io");
+  
   function _keyEventHandler($event, editor, event) {
     var editor = EditorManager.getFocusedEditor();
     if (editor) {
       var text = editor.document.getText();
-      console.log(text);
+      
+      var socket = io.connect('http://localhost:3000');     
+      socket.emit('msg', { code : text });           
     }
   }
 
