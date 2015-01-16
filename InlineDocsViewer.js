@@ -56,9 +56,9 @@ define(function (require, exports, module) {
     
     var templateVars = {
       propName    : cssPropName,
-      summary     : cssPropDetails.SUMMARY,
-      propValues  : cssPropDetails.VALUES || [],
-      url         : cssPropDetails.URL,
+      summary     : 'hoge summary', // cssPropDetails.SUMMARY,
+      propValues  : 'hoge prop',    // cssPropDetails.VALUES || [],
+      url         : 'hoge url',     // cssPropDetails.URL,
       Strings     : Strings
     };
     
