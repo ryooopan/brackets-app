@@ -14,9 +14,7 @@ define(function (require, exports, module) {
       FileUtils       = brackets.getModule("file/FileUtils"),
       KeyEvent        = brackets.getModule("utils/KeyEvent"),
       Menus           = brackets.getModule("command/Menus"),
-      QuickOpen       = brackets.getModule("search/QuickOpen");
- 
-  
+      QuickOpen       = brackets.getModule("search/QuickOpen");  
 
   var InlineDocsViewer = require("InlineDocsViewer");
   var io = require("./lib/socket.io");
@@ -41,8 +39,8 @@ define(function (require, exports, module) {
     if (editor) {
       var text = editor.document.getText();
       
-      var socket = io.connect('http://localhost:3000');     
-      socket.emit('msg', { code : text });           
+      //var socket = io.connect('http://localhost:3000');     
+      //socket.emit('msg', { code : text });           
     }
   }
 

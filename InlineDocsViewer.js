@@ -192,6 +192,19 @@ define(function (require, exports, module) {
     this._sizeEditorToContent();
     $(window).on("resize", this._sizeEditorToContent);
 
+    var io = require("./lib/socket.io");
+    var socket = io.connect('http://localhost:3000');
+
+    socket.on('msg', function (data) {
+      $('#list').prepend('<li>' + data.text + '</li>');
+    });
+    
+    $('#btn').click( function() {
+      var message = $('#message').val()
+      socket.emit('msg', { text : message });
+    });
+
+    
     // Set focus
     this.$scroller[0].focus();
     this.$wrapperDiv[0].addEventListener("keydown", this._onKeydown, true);
