@@ -33,6 +33,7 @@ define(function (require, exports, module) {
   
   // Load Brackets modules
   var ExtensionUtils  = brackets.getModule("utils/ExtensionUtils"),
+      EditorManager   = brackets.getModule("editor/EditorManager"),      
       InlineWidget    = brackets.getModule("editor/InlineWidget").InlineWidget,
       KeyEvent        = brackets.getModule("utils/KeyEvent"),
       Strings         = brackets.getModule("strings");
@@ -194,15 +195,21 @@ define(function (require, exports, module) {
 
     var io = require("./lib/socket.io");
     var socket = io.connect('http://localhost:8080');
+    var editor = EditorManager.getFocusedEditor();
 
     socket.on('msg', function (data) {
       $('#list').prepend('<li>' + data.text + '</li>');
+      console.log(data.selection);
+      
     });
     
     $('#chat-form').submit( function(event) {
       event.preventDefault();
       var $input = $('input', this);
-      socket.emit('msg', { text : $input.val() });
+      var text = $input.val();
+      var selection = editor.getSelection();
+      
+      socket.emit('msg', { text : text, selection: selection });
       $input.val('').focus();
     });
 

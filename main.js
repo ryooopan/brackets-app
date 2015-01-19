@@ -61,6 +61,16 @@ define(function (require, exports, module) {
     var currentEditor = EditorManager.getActiveEditor();
     $(currentEditor).on('keydown', _keyEventHandler);
     $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
+    
+    var io = require("./lib/socket.io");
+    var socket = io.connect('http://localhost:8080');
+    
+    socket.on('msg', function (data) {
+      console.log(data);
+      var editor = EditorManager.getActiveEditor();
+      // editor.setSelection(data.selection);
+      editor.setSelection( data.selection.start, data.selection.end );
+    });
   });
   
   // $(EditorManager.getCurrentFullEditor()).on('keyEvent', _handleKeyEvent);
