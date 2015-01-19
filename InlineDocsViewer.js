@@ -193,15 +193,17 @@ define(function (require, exports, module) {
     $(window).on("resize", this._sizeEditorToContent);
 
     var io = require("./lib/socket.io");
-    var socket = io.connect('http://localhost:3000');
+    var socket = io.connect('http://localhost:8080');
 
     socket.on('msg', function (data) {
       $('#list').prepend('<li>' + data.text + '</li>');
     });
     
-    $('#btn').click( function() {
-      var message = $('#message').val()
-      socket.emit('msg', { text : message });
+    $('#chat-form').submit( function(event) {
+      event.preventDefault();
+      var $input = $('input', this)
+      socket.emit('msg', { text : $input.message });
+      $input.val('').focus();
     });
 
     
