@@ -201,8 +201,8 @@ define(function (require, exports, module) {
     
     $('#chat-form').submit( function(event) {
       event.preventDefault();
-      var $input = $('input', this)
-      socket.emit('msg', { text : $input.message });
+      var $input = $('input', this);
+      socket.emit('msg', { text : $input.val() });
       $input.val('').focus();
     });
 
