@@ -10,7 +10,7 @@ define(function (require, exports, module) {
       CommandManager  = brackets.getModule("command/CommandManager"),
       DocumentManager = brackets.getModule("document/DocumentManager"),
       EditorManager   = brackets.getModule("editor/EditorManager"),
-      FileSystem      = brackets.getModule("file/FileSystem"),
+      FileSystem      = brackets.getModule("filesystem/FileSystem"),
       FileUtils       = brackets.getModule("file/FileUtils"),
       KeyEvent        = brackets.getModule("utils/KeyEvent"),
       Menus           = brackets.getModule("command/Menus"),
@@ -55,8 +55,8 @@ define(function (require, exports, module) {
     }
   }
 
-  EidtorManager.registerInlineDocsProvider(inlineProvider);
-  exports._inlineProvider = InlineProvider;
+  EditorManager.registerInlineDocsProvider(inlineProvider);
+  exports._inlineProvider = inlineProvider;
   
   AppInit.appReady(function() {
     console.log('MYAPP IS READY');
