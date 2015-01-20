@@ -195,8 +195,23 @@ define(function (require, exports, module) {
 
     var io = require("./lib/socket.io");
     var socket = io.connect('http://localhost:8080');
-    var editor = EditorManager.getFocusedEditor();
-
+    
+    var editor = EditorManager.getCurrentFullEditor();
+    var node = document.createElement("div");
+    node.textContent = 'HOGEHOGEHGOE';
+    editor._codeMirror.addLineWidget(0, node);
+    
+    /*
+    var i = 0;
+    setInterval( function() {
+      editor._codeMirror.addLineWidget( i, node );
+      //editor.removeAllInlineWidgets()
+      //editor.addInlineWidget(i, this );
+      console.log(i);
+      i++;
+    }, 1000);
+    */
+    
     socket.on('msg', function (data) {
       $('#list').prepend('<li>' + data.text + '</li>');
       console.log(data.selection);

@@ -18,7 +18,7 @@ define(function (require, exports, module) {
 
   var InlineDocsViewer = require("InlineDocsViewer");
   var io = require("./lib/socket.io");
-
+  
   function inlineProvider(hostEditor, pos) {
     var result = new $.Deferred();
     
@@ -35,9 +35,13 @@ define(function (require, exports, module) {
   }
   
   function _keyEventHandler($event, editor, event) {
-    var editor = EditorManager.getFocusedEditor();
+    // var editor = EditorManager.getFocusedEditor();
+    var editor = EditorManager.getCurrentFullEditor();
     if (editor) {
       var text = editor.document.getText();
+
+      //editor.addInlineWidget(5, '<h1>hoge</h1>', 100);
+    
       
       //var socket = io.connect('http://localhost:3000');     
       //socket.emit('msg', { code : text });           
@@ -61,7 +65,7 @@ define(function (require, exports, module) {
     var currentEditor = EditorManager.getActiveEditor();
     $(currentEditor).on('keydown', _keyEventHandler);
     $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
-    
+
     var io = require("./lib/socket.io");
     var socket = io.connect('http://localhost:8080');
     
