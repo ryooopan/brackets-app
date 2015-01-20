@@ -18,6 +18,8 @@ define(function (require, exports, module) {
 
   var InlineDocsViewer = require("InlineDocsViewer");
   var io = require("./lib/socket.io");
+  var socket = io.connect('http://localhost:8080');    
+  var node = null;
   
   function inlineProvider(hostEditor, pos) {
     var result = new $.Deferred();
@@ -36,38 +38,44 @@ define(function (require, exports, module) {
   
   function _keyEventHandler($event, editor, event) {
     // var editor = EditorManager.getFocusedEditor();
+
     var editor = EditorManager.getCurrentFullEditor();
-    if (editor) {
-      var text = editor.document.getText();
-
-      //editor.addInlineWidget(5, '<h1>hoge</h1>', 100);
     
-      
-      //var socket = io.connect('http://localhost:3000');     
-      //socket.emit('msg', { code : text });           
-    }
-  }
+    var cursor = editor.getCursorPos();
+    console.log('line: '+cursor.line);
+    editor._codeMirror.addLineWidget(cursor.line, node);
+    
+    socket.emit('line', cursor.line );
 
+    var text = editor.document.getText();
+  }
+  
   function _activeEditorChangeHandler($event, focusedEditor, lostEditor) {
     if (lostEditor) {
-      $(lostEditor).off('keydown', _keyEventHandler);
+      $(lostEditor).off('keyup', _keyEventHandler);
     }
     if (focusedEditor) {
-      $(focusedEditor).on('keydown', _keyEventHandler);
+      $(focusedEditor).on('keyup', _keyEventHandler);
     }
   }
 
   EditorManager.registerInlineDocsProvider(inlineProvider);
   exports._inlineProvider = inlineProvider;
-  
+
   AppInit.appReady(function() {
     console.log('MYAPP IS READY');
-    var currentEditor = EditorManager.getActiveEditor();
-    $(currentEditor).on('keydown', _keyEventHandler);
+    // node = document.createElement("div");
+    // node.textContent = 'HOGEHOGEHGOE';
+    node = new InlineDocsViewer('hoge', 'hoge descript');
+    node.load(hostEditor);
+
     $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
 
-    var io = require("./lib/socket.io");
-    var socket = io.connect('http://localhost:8080');
+    socket.on('line', function(data) {
+      var editor = EditorManager.getCurrentFullEditor();
+      var line = data;
+      editor._codeMirror.addLineWidget(line, node);      
+    });
     
     socket.on('msg', function (data) {
       console.log(data);
@@ -77,8 +85,6 @@ define(function (require, exports, module) {
     });
   });
   
-  // $(EditorManager.getCurrentFullEditor()).on('keyEvent', _handleKeyEvent);
-
   function handleHelloWorld() {
     var editor = EditorManager.getFocusedEditor();
     if (editor) {
@@ -96,8 +102,6 @@ define(function (require, exports, module) {
   var MY_COMMAND_ID = "helloworld.writehello";   // package-style naming to avoid collisions
   CommandManager.register("Hello World 2", MY_COMMAND_ID, handleHelloWorld);
 
-  // Then create a menu item bound to the command
-  // The label of the menu item is the name we gave the command (see above)
   var menu = Menus.getMenu(Menus.AppMenuBar.FILE_MENU);
   menu.addMenuItem(MY_COMMAND_ID);
 });

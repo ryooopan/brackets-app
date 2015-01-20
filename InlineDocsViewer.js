@@ -211,7 +211,7 @@ define(function (require, exports, module) {
       i++;
     }, 1000);
     */
-    
+
     socket.on('msg', function (data) {
       $('#list').prepend('<li>' + data.text + '</li>');
       console.log(data.selection);
