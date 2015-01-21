@@ -1,8 +1,4 @@
-<div class="css-prop-defn" tabIndex="0" ng-app> <!-- tabIndex needed: otherwise click focuses CodeMirror scroller and Esc won't work -->
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular.min.js"></script>
-  <script>
-    alert('gejof');
-  </script>
+<div class="css-prop-defn" tabIndex="0"> <!-- tabIndex needed: otherwise click focuses CodeMirror scroller and Esc won't work -->
 
   <div class="css-prop-summary">
     <h1>Chat:</h1>
@@ -18,14 +14,18 @@
     <div class="scroller" tabIndex="0"> <!-- tabIndex needed: otherwise can't be focused on open or via click -->
       <ul id="list">
       </ul>
+      <!--
       <dl>
 	{{#propValues}}
 	<dt>{{{value}}}</dt>
 	<dd>{{{description}}}</dd>
 	{{/propValues}}
       </dl>
+      -->
     </div>
   </div>
+  <!--
   <div class="content-bottom"></div>
   <a class="more-info" href="{{url}}" title="{{url}}">{{Strings.DOCS_MORE_LINK}}</a>
+  -->
 </div>

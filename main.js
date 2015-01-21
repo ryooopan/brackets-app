@@ -19,8 +19,85 @@ define(function (require, exports, module) {
   var InlineDocsViewer = require("InlineDocsViewer");
   var io = require("./lib/socket.io");
   var socket = io.connect('http://localhost:8080');    
+  var inlineWidget = null;
   var node = null;
   
+  function _keyEventHandler($event, editor, event) {
+    // var editor = EditorManager.getFocusedEditor();
+
+    var editor = EditorManager.getCurrentFullEditor();
+    var cursor = editor.getCursorPos();
+    var text = editor.document.getText();
+    editor._codeMirror.addLineWidget(cursor.line, node, { coverGutter: true, noHScroll: true });
+    socket.emit('pos', cursor );
+
+  }
+  
+  AppInit.appReady(function() {
+    console.log('MYAPP IS READY');
+    $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
+
+    
+	socket.on('msg', function (data) {
+	  $('#list').prepend('<li>' + data.text + '</li>');
+	  editor._codeMirror.addLineWidget(data.cursor.line, node, { coverGutter: true, noHScroll: true });
+	  console.log(data.selection);
+	});
+
+    socket.on('pos', function(data) {
+      var editor = EditorManager.getCurrentFullEditor();
+      var cursor = data;
+      editor._codeMirror.addLineWidget(cursor.line, node);      
+    });
+    
+    /*
+    socket.on('msg', function (data) {
+      console.log(data);
+      var editor = EditorManager.getActiveEditor();
+      // editor.setSelection(data.selection);
+      editor.setSelection( data.selection.start, data.selection.end );
+    });
+    */
+  });
+
+  function _activeEditorChangeHandler($event, focusedEditor, lostEditor) {
+    if (lostEditor) {
+      $(lostEditor).off('keyup', _keyEventHandler);
+    }
+    if (focusedEditor) {
+      var editor = focusedEditor;
+      node = window.document.createElement('div')
+      var html = $(node).addClass("inline-widget").attr("tabindex", "-1");
+      html.append("<div class='shadow top' />")
+        .append("<div class='shadow bottom' />")
+        .append("<a href='#' class='close no-focus'>&times;</a>");
+
+      var embed = require("text!InlineDocsViewer.html");
+      html.append(embed);
+      html.one('click', function() {
+	console.log('Ready for chatting');
+
+	$('#chat-form').submit( function(event) {
+	  event.preventDefault();
+	  var $input = $('input', this);
+	  var text = $input.val();
+	  var selection = editor.getSelection();
+	  var cursor = editor.getCursorPos();
+	  socket.emit('msg', { text : text, pos: cursor, selection: selection });
+	  $input.val('').focus();
+	});
+
+    
+
+      });
+      
+      $(focusedEditor).on('keyup', _keyEventHandler);
+    }
+  }
+
+  EditorManager.registerInlineDocsProvider(inlineProvider);
+  exports._inlineProvider = inlineProvider;
+
   function inlineProvider(hostEditor, pos) {
     var result = new $.Deferred();
     
@@ -36,72 +113,6 @@ define(function (require, exports, module) {
 
   }
   
-  function _keyEventHandler($event, editor, event) {
-    // var editor = EditorManager.getFocusedEditor();
 
-    var editor = EditorManager.getCurrentFullEditor();
-    
-    var cursor = editor.getCursorPos();
-    console.log('line: '+cursor.line);
-    editor._codeMirror.addLineWidget(cursor.line, node);
-    
-    socket.emit('line', cursor.line );
 
-    var text = editor.document.getText();
-  }
-  
-  function _activeEditorChangeHandler($event, focusedEditor, lostEditor) {
-    if (lostEditor) {
-      $(lostEditor).off('keyup', _keyEventHandler);
-    }
-    if (focusedEditor) {
-      $(focusedEditor).on('keyup', _keyEventHandler);
-    }
-  }
-
-  EditorManager.registerInlineDocsProvider(inlineProvider);
-  exports._inlineProvider = inlineProvider;
-
-  AppInit.appReady(function() {
-    console.log('MYAPP IS READY');
-    // node = document.createElement("div");
-    // node.textContent = 'HOGEHOGEHGOE';
-    node = new InlineDocsViewer('hoge', 'hoge descript');
-    node.load(hostEditor);
-
-    $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
-
-    socket.on('line', function(data) {
-      var editor = EditorManager.getCurrentFullEditor();
-      var line = data;
-      editor._codeMirror.addLineWidget(line, node);      
-    });
-    
-    socket.on('msg', function (data) {
-      console.log(data);
-      var editor = EditorManager.getActiveEditor();
-      // editor.setSelection(data.selection);
-      editor.setSelection( data.selection.start, data.selection.end );
-    });
-  });
-  
-  function handleHelloWorld() {
-    var editor = EditorManager.getFocusedEditor();
-    if (editor) {
-      var insertionPos = editor.getCursorPos();
-      var mode = editor.getModeForDocument();
-      var lang = editor.document.getLanguage();
-      var text = editor.document.getText();
-      console.log(mode);
-      console.log(lang);
-      console.log(text);
-      //editor.document.replaceRange("Hello, world!", insertionPos);
-    }
-  }
-
-  var MY_COMMAND_ID = "helloworld.writehello";   // package-style naming to avoid collisions
-  CommandManager.register("Hello World 2", MY_COMMAND_ID, handleHelloWorld);
-
-  var menu = Menus.getMenu(Menus.AppMenuBar.FILE_MENU);
-  menu.addMenuItem(MY_COMMAND_ID);
 });

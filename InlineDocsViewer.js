@@ -196,11 +196,13 @@ define(function (require, exports, module) {
     var io = require("./lib/socket.io");
     var socket = io.connect('http://localhost:8080');
     
+    /*
     var editor = EditorManager.getCurrentFullEditor();
     var node = document.createElement("div");
     node.textContent = 'HOGEHOGEHGOE';
     editor._codeMirror.addLineWidget(0, node);
-    
+    */
+
     /*
     var i = 0;
     setInterval( function() {
@@ -230,7 +232,7 @@ define(function (require, exports, module) {
 
     
     // Set focus
-    this.$scroller[0].focus();
+    // this.$scroller[0].focus();
     this.$wrapperDiv[0].addEventListener("keydown", this._onKeydown, true);
   };
   
