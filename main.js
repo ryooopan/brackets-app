@@ -37,12 +37,11 @@ define(function (require, exports, module) {
     console.log('MYAPP IS READY');
     $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
 
-    
-	socket.on('msg', function (data) {
-	  $('#list').prepend('<li>' + data.text + '</li>');
-	  editor._codeMirror.addLineWidget(data.cursor.line, node, { coverGutter: true, noHScroll: true });
-	  console.log(data.selection);
-	});
+    socket.on('msg', function (data) {
+      $('#list').prepend('<li>' + data.text + '</li>');
+      editor._codeMirror.addLineWidget(data.cursor.line, node, { coverGutter: true, noHScroll: true });
+      console.log(data.selection);
+    });
 
     socket.on('pos', function(data) {
       var editor = EditorManager.getCurrentFullEditor();
@@ -65,7 +64,33 @@ define(function (require, exports, module) {
       $(lostEditor).off('keyup', _keyEventHandler);
     }
     if (focusedEditor) {
+
+
+      
       var editor = focusedEditor;
+      //var document = DocumentManager.getCurrentDocument();
+      window.editor = editor;
+      /**
+       * change = [
+       *   Object {from: e.Pos, to: e.Pos, text: Array[1], removed: Array[1], origin: "+delete"}
+       * ]
+       */
+
+      editor._codeMirror.addSelection({line: 0, ch: 0}, {line: 3, ch: 3});
+      editor._codeMirror.extendSelection({line: 0, ch: 0}, {line: 3, ch: 3});
+      
+      $(editor.document).on('change', function($event, document, change) {
+	console.log($event);
+	console.log(document);
+	window.change = change;
+	console.log(change[0]);
+	console.log(change.from);
+	console.log(change.to);
+	console.log(change.text);
+      });
+      
+
+      /*
       node = window.document.createElement('div')
       var html = $(node).addClass("inline-widget").attr("tabindex", "-1");
       html.append("<div class='shadow top' />")
@@ -90,7 +115,7 @@ define(function (require, exports, module) {
     
 
       });
-      
+      */
       $(focusedEditor).on('keyup', _keyEventHandler);
     }
   }
