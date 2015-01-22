@@ -25,137 +25,50 @@ define(function (require, exports, module) {
   var text = null;
   var document = null;
 
+  console.log('MYAPP IS READY');
+  $('<style>.hoge { background: red; }</style>').appendTo('head')
+  $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
 
-
-  
-  function _keyEventHandler($event, editor, event) {
-    // var editor = EditorManager.getFocusedEditor();
-
-    var editor = EditorManager.getCurrentFullEditor();
-    var cursor = editor.getCursorPos();
-    var text = editor.document.getText();
-    //editor._codeMirror.addLineWidget(cursor.line, node, { coverGutter: true, noHScroll: true });
-    //socket.emit('pos', cursor );
-
-  }
-  
-  AppInit.appReady(function() {
-    console.log('MYAPP IS READY');
-    $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
-
-    $('<style>.hoge { background: red; }</style>').appendTo('head')
-    
-    socket.on('change', function(data) {
-      var editor = EditorManager.getCurrentFullEditor();
-      editor.document.setText(data.text);
-      /*
-      data.lines.change.forEach(function(i) {
-	editor._codeMirror.addLineClass(i, 'gutter', 'hoge');
-      });
-      data.lines.undo.forEach(function(i) {
-	editor._codeMirror.removeLineClass(i, 'gutter', 'hoge');
-      });
-      */
-    });
-
-    socket.on('msg', function (data) {
-      $('#list').prepend('<li>' + data.text + '</li>');
-      //editor._codeMirror.addLineWidget(data.cursor.line, node, { coverGutter: true, noHScroll: true });
-      console.log(data.selection);
-    });
-
-    socket.on('pos', function(data) {
-      var editor = EditorManager.getCurrentFullEditor();
-      var cursor = data;
-      //editor._codeMirror.addLineWidget(cursor.line, node);      
-    });
-    
-    /*
-    socket.on('msg', function (data) {
-      console.log(data);
-      var editor = EditorManager.getActiveEditor();
-      // editor.setSelection(data.selection);
-      editor.setSelection( data.selection.start, data.selection.end );
-    });
-    */
-  });
-
-  /**
-   */
-  
   function _activeEditorChangeHandler($event, focusedEditor, lostEditor) {
     if (lostEditor) {
       $(lostEditor).off('keyup', _keyEventHandler);
     }
+
     if (focusedEditor) {
       var editor = focusedEditor;
+      var cursor = editor.getCursorPos();
+      var cm = editor._codeMirror;
       window.editor = editor;
-      text = editor.document.getText(); //.split('\n');
+      window.cm = cm;
       
-      $(editor.document).on('change', function($event, document, change) {
-	var before = text;
-	var after  = editor.document.getText();
-	/*
-	// change = {from: e.Pos, to: e.Pos, text: Array[1], removed: Array[1], origin: "+delete"}
-	var lines = { change: [], undo: [] };
-	for(var i = change[0].from.line; i < change[0].to.line + 1; i++) {
-	  var beforeLine = text[i];
-	  var afterLine  = editor.document.getLine(i);
-	  if (beforeLine !== afterLine) {
-	    lines.change.push(i);
-	  } else {
-	    lines.undo.push(i);
-	  }
-	}
-	*/
-	// socket.emit('change', { text: after, lines: lines } );
-	socket.emit('change', { text: after });
+      socket.on('refresh', function(data) {
+	cm.setValue(data.body);
       });
-    
-
-      /*
-      node = window.document.createElement('div')
-      var html = $(node).addClass("inline-widget").attr("tabindex", "-1");
-      html.append("<div class='shadow top' />")
-        .append("<div class='shadow bottom' />")
-        .append("<a href='#' class='close no-focus'>&times;</a>");
-
-      var embed = require("text!InlineDocsViewer.html");
-      html.append(embed);
-      html.one('click', function() {
-	console.log('Ready for chatting');
-
-	$('#chat-form').submit( function(event) {
-	  event.preventDefault();
-	  var $input = $('input', this);
-	  var text = $input.val();
-	  var selection = editor.getSelection();
-	  var cursor = editor.getCursorPos();
-	  socket.emit('msg', { text : text, pos: cursor, selection: selection });
-	  $input.val('').focus();
-	});
+      socket.on('change', function(data) {
+	console.log(data);
+	cm.replaceRange(data.text, data.from, data.to);
+	cm.addLineClass(data.from.line, 'background', 'hoge');
       });
-      */
-      $(focusedEditor).on('keyup', _keyEventHandler);
+      socket.on('cursor', function(data) {
+	console.log(data);
+      });
+      
+      cm.on('change', function(i, op) {
+	//console.log(op);
+	socket.emit('change', op);
+	socket.emit('refresh', cm.getValue());
+      });      
+      cm.on('cursorActivity', function(i) {
+	socket.emit('cursor', cm.getCursor());
+      });
     }
   }
-
-  EditorManager.registerInlineDocsProvider(inlineProvider);
-  exports._inlineProvider = inlineProvider;
-
-  function inlineProvider(hostEditor, pos) {
-    var result = new $.Deferred();
-    
-    var currentDoc = DocumentManager.getCurrentDocument().getText();
-    var docDir = FileUtils.getDirectoryPath(hostEditor.document.file.fullPath);
-    var langId = hostEditor.getLanguageForSelection().getId();
-
-    var inlineWidget = new InlineDocsViewer('hoge', 'hoge descript');
-    inlineWidget.load(hostEditor);
-    result.resolve(inlineWidget);
-    
-    return result.promise();
-
+  
+  function _keyEventHandler($event, editor, event) {
+    var editor = EditorManager.getCurrentFullEditor();
+    var cursor = editor.getCursorPos();
+    var text = editor.document.getText();    
+    // socket.emit('change', { cursor: cursor, change: [] });    
   }
   
 
