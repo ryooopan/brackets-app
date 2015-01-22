@@ -19,7 +19,7 @@ define(function (require, exports, module) {
   var InlineDocsViewer = require("InlineDocsViewer");
   var jsdiff = require('./lib/diff');
   var io = require("./lib/socket.io");
-  var socket = io.connect('http://localhost:8080');    
+  var socket = io.connect('/');  // http://localhost:8080
   var inlineWidget = null;
   var node = null;
   var text = null;
