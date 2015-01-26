@@ -19,16 +19,17 @@ define(function (require, exports, module) {
   var InlineDocsViewer = require("InlineDocsViewer");
   var jsdiff = require('./lib/diff');
   var io = require("./lib/socket.io");
-  var socket = io.connect('/');  // http://localhost:8080
+  var socket = io.connect('http://localhost:8080');
+  // var socket = io.connect('/');  
   var inlineWidget = null;
   var node = null;
   var text = null;
   var document = null;
 
   console.log('MYAPP IS READY');
-  $('<style>.hoge { background: red; } .fuga { background: red; }</style>').appendTo('head')
+  $('<style>.fuga { background: #98df8a; } .hoge { background: #9edae5; }</style>').appendTo('head');
   $(EditorManager).on('activeEditorChange', _activeEditorChangeHandler);
-
+  
   function _activeEditorChangeHandler($event, focusedEditor, lostEditor) {
     if (lostEditor) {
       $(lostEditor).off('keyup', _keyEventHandler);
@@ -66,7 +67,7 @@ define(function (require, exports, module) {
   }
   
   function _keyEventHandler($event, editor, event) {
-    var editor = EditorManager.getCurrentFullEditor();
+    // var editor = EditorManager.getCurrentFullEditor();
     var cursor = editor.getCursorPos();
     var text = editor.document.getText();    
     // socket.emit('change', { cursor: cursor, change: [] });    
